@@ -59,6 +59,10 @@
 }
 
 - (UIViewController *)activityViewController {
+    if (self.shouldUploadToRoot) {
+        return [super activityViewController];
+    }
+    
     GSDropboxDestinationSelectionViewController *vc = [[GSDropboxDestinationSelectionViewController alloc] initWithStyle:UITableViewStylePlain];
     vc.delegate = self;
 
@@ -68,16 +72,24 @@
     return nc;
 }
 
+- (void)performActivity {
+    [self uploadFilesToPath:@"/"];
+}
+
+- (void)uploadFilesToPath:(NSString *)path {
+    for (NSURL *fileURL in self.activityItems) {
+        [[GSDropboxUploader sharedUploader] uploadFileWithURL:fileURL toPath:@"/"];
+    }
+    self.activityItems = nil;
+    [self activityDidFinish:YES];
+}
+
 #pragma mark - GSDropboxDestinationSelectionViewController delegate methods
 
 - (void)dropboxDestinationSelectionViewController:(GSDropboxDestinationSelectionViewController *)viewController
                          didSelectDestinationPath:(NSString *)destinationPath
 {
-    for (NSURL *fileURL in self.activityItems) {
-        [[GSDropboxUploader sharedUploader] uploadFileWithURL:fileURL toPath:destinationPath];
-    }
-    self.activityItems = nil;
-    [self activityDidFinish:YES];
+    [self uploadFilesToPath:destinationPath];
 }
 
 - (void)dropboxDestinationSelectionViewControllerDidCancel:(GSDropboxDestinationSelectionViewController *)viewController

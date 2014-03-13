@@ -9,6 +9,8 @@
 
 @interface GSDropboxActivity : UIActivity
 
+@property (assign, nonatomic, getter = shouldUploadToRoot) BOOL uploadToRoot;
+
 + (NSString*)activityTypeString;
 
 @end
